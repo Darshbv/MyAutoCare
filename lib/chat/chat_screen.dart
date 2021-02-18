@@ -14,54 +14,32 @@ class _ChatScreenState extends State<ChatScreen> {
     if (isMe) {
       return Column(
         children: <Widget>[
-          Stack(
-            children: [Container(
-              alignment: Alignment.topRight,
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.80,
-                ),
-                padding: EdgeInsets.all(10),
-                margin: EdgeInsets.fromLTRB(40, 10, 10, 10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                    ),
-                  ],
-                ),
-                child: Text(
-                  message.text,
-                  style: TextStyle(
-                    color: Colors.white,
+          Container(
+            alignment: Alignment.topRight,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.80,
+              ),
+              padding: EdgeInsets.all(10),
+              margin: EdgeInsets.fromLTRB(40, 10, 10, 10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
                   ),
+                ],
+              ),
+              child: Text(
+                message.text,
+                style: TextStyle(
+                  color: Colors.white,
                 ),
               ),
             ),
-              Positioned(
-                top: 30,
-                left: 350,
-                child:Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                    ),
-                  ],
-                ),
-                child: CircleAvatar(
-                  radius: 15,
-                  backgroundImage: AssetImage(message.sender.imageUrl),
-                ),
-              ), )
-    ]
           ),
           !isSameUser
               ? Row(
@@ -77,6 +55,23 @@ class _ChatScreenState extends State<ChatScreen> {
               SizedBox(
                 width: 10,
               ),
+              Container(
+                width: 30,
+              height: 30,
+                    decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    image: DecorationImage(
+                      image: AssetImage(message.sender.imageUrl),
+                    ),
+                    boxShadow: [
+                             BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                ),
+                              ],
+                            ),
+                              ),
 
             ],
           )
@@ -121,19 +116,20 @@ class _ChatScreenState extends State<ChatScreen> {
               ? Row(
             children: <Widget>[
               Container(
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(5),
+                  image: DecorationImage(
+                    image: AssetImage(message.sender.imageUrl),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
+                      color: Colors.red.withOpacity(0.5),
                       spreadRadius: 2,
                       blurRadius: 5,
                     ),
                   ],
-                ),
-                child: CircleAvatar(
-                  radius: 15,
-                  backgroundImage: AssetImage(message.sender.imageUrl),
                 ),
               ),
               SizedBox(
@@ -182,6 +178,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Expanded(
             child: TextField(
+              maxLines: 10,
               decoration: InputDecoration.collapsed(
                 hintText: 'Type a message..',
               ),
@@ -203,6 +200,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     int prevUserId;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: false,

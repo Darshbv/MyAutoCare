@@ -1,6 +1,7 @@
 import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:my_autocare/details/new_car_details.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -48,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     CircleAvatar(
-                      radius: 40,
+                      radius: 35,
                       backgroundImage: AssetImage(
                         "images/logo.png"
                       ),
@@ -111,7 +112,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _getCollection(title: "New Cars",img: "images/img.png"),
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context)=>NewCars()));                },
+                  child: _getCollection(title: "New Cars",img: "images/img.png")),
               _getCollection(title: "Used Cars",img: "images/img.png")
             ],
           ),
