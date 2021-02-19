@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1051778233966-qqn73blf73bi4l24eof0r8astioelu3v.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1051778233966-qqn73blf73bi4l24eof0r8astioelu3v</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1051778233966-fa8kckqq70t2igf15ee4mn99qsgs5n6b.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBUV_54xSvRp_NDOufvIfbIs-H6kAZ2phs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1051778233966</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.myAutocare</string>
+	<key>PROJECT_ID</key>
+	<string>flutter-project-55dba</string>
+	<key>STORAGE_BUCKET</key>
+	<string>flutter-project-55dba.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1051778233966:ios:5f0328a85801f5719cd87f</string>
+</dict>
+</plist>

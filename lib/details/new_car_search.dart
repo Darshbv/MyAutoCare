@@ -100,7 +100,6 @@ class _SearchNewCarListState extends State<SearchNewCarList> {
                 enabledBorder: InputBorder.none,
                 hintText: "What are you looking for?",
                 hintStyle: TextStyle(fontSize: 18),
-                hintTextDirection: TextDirection.ltr,
                 prefixIcon: Icon(Icons.search,color: Colors.grey[600],)
               ),
               onChanged: (text) {

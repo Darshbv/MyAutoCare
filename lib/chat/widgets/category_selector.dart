@@ -28,7 +28,6 @@ class _CategorySelectorState extends State<CategorySelector> {
                   enabledBorder: InputBorder.none,
                   hintText: "Search",
                   hintStyle: TextStyle(fontSize: 18),
-                  hintTextDirection: TextDirection.ltr,
                 ),
               ),
             ),

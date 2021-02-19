@@ -19,7 +19,7 @@ class _ChatConsoleState extends State<ChatConsole> {
         title: Row(
           children: [
             CircleAvatar(
-              radius: 28,
+              radius: 25.5,
               backgroundImage: AssetImage(
                   "images/logos.png"
               ),

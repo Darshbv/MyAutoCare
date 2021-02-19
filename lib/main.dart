@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:my_autocare/Authentication/signin.dart';
 import 'package:my_autocare/pages/main_page.dart';
 
+
+
 void main()
 {
   runApp(MaterialApp(
     debugShowCheckedModeBanner:false ,
     theme: ThemeData(
-        primaryColor: Color(0xFFF62E2E)
+        primaryColor: Color(0xFFF62E2E),
+      visualDensity: VisualDensity.adaptivePlatformDensity,
     ),
     home: Pages(),
   ));
