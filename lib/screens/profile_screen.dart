@@ -1,227 +1,1383 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:my_autocare/autobook_controller/post_controller.dart';
+import 'package:my_autocare/autobook_controller/profile_controller.dart';
+import 'package:my_autocare/main_model/like_post_model.dart';
+import 'package:my_autocare/main_model/post_model.dart';
+import 'package:my_autocare/main_model/post_user_likes.dart';
+import 'package:my_autocare/main_model/post_user_media.dart';
+import 'package:my_autocare/main_model/post_user_model.dart';
+import 'package:my_autocare/main_model/profile_model.dart';
+import 'package:my_autocare/post_upload/post_controller.dart';
+import 'package:http/http.dart' as http;
+import 'package:my_autocare/shared_perferences/login_user_data.dart';
+import 'package:share/share.dart';
+import 'package:video_player/video_player.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
-  ProfileScreenState createState() => ProfileScreenState();
+  _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
+  TabController _tabController;
+  PostController postController;
+  PostModel postModel;
+  PostUserModel pum;
+  ProfileModel pm;
+  PostUserMedia postUserMedia;
+  PostUserLikes postUserLikes;
+  bool isloading1 = true;
+  bool isloading2 = true;
+  bool isloading3 = true;
+  bool isloading4 = true;
+
+  bool heartLike = false;
+  int likeCount = 0;
+
+  VideoPlayerController _controller;
+  Future<void> _initializeVideoPlayerFuture;
+
+  List<String> postDropdown = ['Delete', 'Copy Link'];
+
+  String utf8convert(String text) {
+    List<int> bytes = text.toString().codeUnits;
+    return utf8.decode(bytes);
+  }
+
+  getProfileData() async {
+    String userId = await getUserId();
+    print(userId);
+    ProfileController pc = ProfileController();
+    pm = await pc.getProfileInfo(userId);
+    setState(() {
+      isloading1 = false;
+    });
+  }
+
+  getUserPostData() async {
+    String userId = await getUserId();
+    String session_id = await getUserAuth();
+    postController = PostController();
+    pum = await postController.fetchUserPost(userId, session_id);
+    setState(() {
+      isloading2 = false;
+    });
+  }
+
+  getUserMediaData() async {
+    String userId = await getUserId();
+    String session_id = await getUserAuth();
+    postController = PostController();
+    postUserMedia = await postController.fetchUserMedia(userId, session_id);
+    setState(() {
+      isloading3 = false;
+    });
+  }
+
+  getUserLikedData() async {
+    String userId = await getUserId();
+    String session_id = await getUserAuth();
+    postController = PostController();
+    postUserLikes = await postController.fetchUserLikes(userId, session_id);
+    setState(() {
+      isloading4 = false;
+    });
+  }
+
+  void showBottom() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            padding: EdgeInsets.all(15.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Post Image"),
+                    IconButton(
+                        icon: Icon(Icons.upload_file),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => PostImageex()));
+                        })
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Post Video"),
+                    IconButton(
+                        icon: Icon(Icons.upload_file),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => PostVideo()));
+                        })
+                  ],
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  LikePost lk;
+  //Show Like Button//
+  Future<LikePost> showLikeButton(String session_id, String post_id) async {
+    var response = await http.post(
+        "https://myautocare.in/Socialmedia/mobile_api/like_post",
+        body: {"session_id": session_id, "post_id": post_id});
+    if (response.statusCode == 200) {
+      lk = likePostFromJson(response.body);
+      return lk;
+    } else {
+      return null;
+    }
+  }
+
+  RePost rp;
+  //Show Like Button//
+  Future<RePost> repostButton(String session_id, String post_id) async {
+    var response = await http.post(
+        "https://myautocare.in/Socialmedia/mobile_api/publication_repost",
+        body: {"session_id": session_id, "post_id": post_id});
+    if (response.statusCode == 200) {
+      lk = likePostFromJson(response.body);
+      return rp;
+    } else {
+      return null;
+    }
+  }
+
+  //delete Post//
+  Future<void> deletePost(String session_id, String post_id) async {
+    print(session_id);
+    print(post_id);
+    var response = await http.post(
+        "https://myautocare.in/Socialmedia/mobile_api/delete_post",
+        body: {"session_id": session_id, "post_id": post_id});
+    if (response.statusCode == 200) {
+      print("Deleted");
+      return null;
+    } else {
+      print("Not Deleted");
+      return null;
+    }
+  }
+
+  @override
+  void initState() {
+    _tabController = new TabController(length: 3, vsync: this);
+    super.initState();
+    getProfileData();
+    getUserPostData();
+    getUserMediaData();
+    getUserLikedData();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'My Profile',
-            style: TextStyle(
-              fontWeight: FontWeight.bold
-            ),
-          ),
-          centerTitle: false,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 30, 10),
-              child: Image.asset("images/qrcode.png",width: 30,height: 30,),
-            ),
-          ],
-          backgroundColor: Colors.red,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20.0),
-              bottomRight: Radius.circular(20.0),
-            ),
-          ),
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            SizedBox(
-              height: 260,
-              child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CircleAvatar(
-                                radius: 40,
-                                backgroundImage: AssetImage("images/logo.png"),
-                              ),
+    return Scaffold(
+        body: isloading1
+            ? Center(
+                child: CircularProgressIndicator(
+                    valueColor: new AlwaysStoppedAnimation<Color>(
+                        Colors.deepOrangeAccent)))
+            : SingleChildScrollView(
+                child: SafeArea(
+                    child: Column(children: [
+                  Stack(overflow: Overflow.visible, children: [
+                    Container(
+                      width: double.infinity,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: NetworkImage(pm.user.cover)),
+                      ),
+                    ),
+                    Positioned(
+                      top: 210,
+                      left: 240,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          RaisedButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25.0),
+                                side: BorderSide(color: Colors.red)),
+                            onPressed: () {},
+                            color: Colors.red,
+                            textColor: Colors.white,
+                            child: Text("PROFILE SETTINGS".toUpperCase(),
+                                style: TextStyle(
+                                    fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              color: Colors.deepOrangeAccent,
+                              icon: Icon(Icons.more_vert),
+                              onPressed: () {
+                                showBottom();
+                              },
                             ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          width: double.infinity,
+                          height: 125,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                width: 100,
+                                height: 100,
+                                decoration: ShapeDecoration(
+                                    shape: CircleBorder(),
+                                    color: Colors.deepOrangeAccent),
+                                child: Padding(
+                                  padding: EdgeInsets.all(3.0),
+                                  child: DecoratedBox(
+                                    decoration: ShapeDecoration(
+                                      shape: CircleBorder(),
+                                      image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(pm.user.avatar)),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            "${pm.user.name}",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            '${pm.user.username}',
+                            style: TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Text("Name",style: TextStyle(
-                                    color: Colors.black,
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 18),),
-                                Text("Username"),
+                                Icon(Icons.location_on),
+                                Text(
+                                  "Living in- ${pm.user.city}",
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Image.asset("images/facebook.png",width: 25,height: 25,),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Image.asset("images/twitter.png",width: 25,height: 25,),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Image.asset("images/instagram.png",width: 25,height: 25,),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Image.asset("images/youtube.png",width: 25,height: 25,),
-                                    ),
+                                    Icon(Icons.date_range),
+                                    Text(
+                                      "Member Since - ${pm.user.memberSince}",
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold),
+                                    )
                                   ],
                                 )
                               ],
                             ),
                           ],
                         ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "www.myautocare.in",
+                                style: TextStyle(
+                                    color: Colors.blueAccent, fontSize: 14),
+                              ),
+                              Text(utf8convert(pm.user.about)),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            RichText(
+                              text: new TextSpan(
+                                text: '${pm.user.posts}',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                                children: <TextSpan>[
+                                  new TextSpan(
+                                      text: ' Posts',
+                                      style:
+                                          TextStyle(color: Colors.grey[600])),
+                                ],
+                              ),
+                            ),
+                            RichText(
+                              text: new TextSpan(
+                                text: '${pm.user.following}',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                                children: <TextSpan>[
+                                  new TextSpan(
+                                      text: ' Following',
+                                      style:
+                                          TextStyle(color: Colors.grey[600])),
+                                ],
+                              ),
+                            ),
+                            RichText(
+                              text: new TextSpan(
+                                text: '${pm.user.followers}',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                                children: <TextSpan>[
+                                  new TextSpan(
+                                      text: ' Followers',
+                                      style:
+                                          TextStyle(color: Colors.grey[600])),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Divider(
+                          height: 5,
+                          thickness: 1,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Container(
+                            height: 0.43 * MediaQuery.of(context).size.height,
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    height: 32,
+                                    child: TabBar(
+                                      labelColor: Colors.deepOrange,
+                                      unselectedLabelStyle: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      indicatorColor: Colors.deepOrangeAccent,
+                                      unselectedLabelColor: Colors.grey[600],
+                                      labelStyle: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey),
+                                      onTap: (index) {
+                                        print(index);
+                                      },
+                                      tabs: [
+                                        Tab(
+                                          child: Center(
+                                              child: Text(
+                                            "POSTS",
+                                            textAlign: TextAlign.center,
+                                          )),
+                                        ),
+                                        Tab(
+                                          child: Center(
+                                              child: Text(
+                                            "MEDIA",
+                                            textAlign: TextAlign.center,
+                                          )),
+                                        ),
+                                        Tab(
+                                          child: Center(
+                                              child: Text(
+                                            "LIKES",
+                                            textAlign: TextAlign.center,
+                                          )),
+                                        ),
+                                      ],
+                                      controller: _tabController,
+                                      indicatorSize: TabBarIndicatorSize.tab,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  Expanded(
+                                    child: TabBarView(
+                                      children: [
+                                        isloading2
+                                            ? Center(
+                                                child:
+                                                    CircularProgressIndicator())
+                                            : pum.code != 200
+                                                ? Center(
+                                                    child: Container(
+                                                        child: Text("No Post")),
+                                                  )
+                                                : ListView.builder(
+                                                    itemCount:
+                                                        pum.data.posts.length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return Container(
+                                                        child: Column(
+                                                          children: [
+                                                            Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.all(
+                                                                            8.0),
+                                                                    child:
+                                                                        Container(
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceEvenly,
+                                                                        children: [
+                                                                          CircleAvatar(
+                                                                            backgroundImage:
+                                                                                NetworkImage(pum.data.posts[index].owner.avatar),
+                                                                            radius:
+                                                                                28,
+                                                                          ),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                12,
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.center,
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                            children: [
+                                                                              Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    utf8convert(pum.data.posts[index].owner.name),
+                                                                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                                                                  ),
+                                                                                  Icon(
+                                                                                    Icons.verified_rounded,
+                                                                                    color: Colors.blueAccent,
+                                                                                    size: 15,
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              Text(
+                                                                                pum.data.posts[index].owner.username,
+                                                                                style: TextStyle(color: Colors.grey),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.all(
+                                                                            8.0),
+                                                                    child:
+                                                                        Container(
+                                                                      child:
+                                                                          Row(
+                                                                        children: [
+                                                                          Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.end,
+                                                                            children: [
+                                                                              Text(
+                                                                                pum.data.posts[index].time,
+                                                                                style: TextStyle(color: Colors.grey),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ]),
+                                                            Container(
+                                                              child: Text(
+                                                                utf8convert(pum
+                                                                    .data
+                                                                    .posts[
+                                                                        index]
+                                                                    .text),
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontSize:
+                                                                        15,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .justify,
+                                                              ),
+                                                            ),
+                                                            pum
+                                                                        .data
+                                                                        .posts[
+                                                                            index]
+                                                                        .media
+                                                                        .length ==
+                                                                    0
+                                                                ? Container()
+                                                                : Container(
+                                                                    height: 180,
+                                                                    child: Padding(
+                                                                        padding: const EdgeInsets.all(4.0),
+                                                                        child: ListView.builder(
+                                                                            scrollDirection: Axis.horizontal,
+                                                                            shrinkWrap: true,
+                                                                            itemCount: pum.data.posts[index].media.length,
+                                                                            itemBuilder: (context, index2) {
+                                                                              return pum.data.posts[index].media[index2].type == "image"
+                                                                                  ? Padding(
+                                                                                      padding: const EdgeInsets.all(8.0),
+                                                                                      child: InkWell(
+                                                                                        onTap: () {},
+                                                                                        child: Container(
+                                                                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
+                                                                                          child: Image.network("${pum.data.posts[index].media[index2].xImg}"),
+                                                                                        ),
+                                                                                      ),
+                                                                                    )
+                                                                                  : Stack(
+                                                                                      children: [
+                                                                                        Padding(
+                                                                                          padding: const EdgeInsets.all(8.0),
+                                                                                          child: InkWell(
+                                                                                            onTap: () {},
+                                                                                            child: Container(
+                                                                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
+                                                                                              child: Image.network("${pum.data.posts[index].media[index2].xImg}"),
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                        Positioned(top: 10, right: 10, child: Icon(Icons.videocam, color: Colors.white))
+                                                                                      ],
+                                                                                    );
+                                                                            })),
+                                                                  ),
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Container(
+                                                                  child: Row(
+                                                                    children: [
+                                                                      SizedBox(
+                                                                        width:
+                                                                            35,
+                                                                      ),
+                                                                      Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceEvenly,
+                                                                        children: [
+                                                                          Icon(
+                                                                            Icons.comment,
+                                                                            size:
+                                                                                20,
+                                                                            color:
+                                                                                Colors.grey,
+                                                                          ),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                8,
+                                                                          ),
+                                                                          Text(
+                                                                            pum.data.posts[index].replysCount,
+                                                                            style:
+                                                                                TextStyle(color: pum.data.posts[index].replysCount != "0" ? Colors.deepOrangeAccent : Colors.grey),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            20,
+                                                                      ),
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          String
+                                                                              userAuth =
+                                                                              await getUserAuth();
+                                                                          print(
+                                                                              userAuth);
+                                                                          print(pum
+                                                                              .data
+                                                                              .posts[index]
+                                                                              .id);
+                                                                          lk = await showLikeButton(
+                                                                              userAuth,
+                                                                              pum.data.posts[index].id.toString());
+                                                                          await getUserPostData();
+                                                                          await getUserLikedData();
+                                                                          await getUserMediaData();
+                                                                        },
+                                                                        child:
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            Icon(Icons.favorite,
+                                                                                size: 20,
+                                                                                color: pum.data.posts[index].hasLiked ? Colors.deepOrangeAccent : Colors.grey),
+                                                                            SizedBox(
+                                                                              width: 8,
+                                                                            ),
+                                                                            Text(
+                                                                              pum.data.posts[index].likesCount,
+                                                                              style: TextStyle(color: pum.data.posts[index].hasLiked ? Colors.deepOrangeAccent : Colors.grey),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            20,
+                                                                      ),
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          String
+                                                                              userAuth =
+                                                                              await getUserAuth();
+                                                                          print(
+                                                                              userAuth);
+                                                                          print(pum
+                                                                              .data
+                                                                              .posts[index]
+                                                                              .id);
+                                                                          await deletePost(
+                                                                              userAuth,
+                                                                              pum.data.posts[index].id.toString());
+                                                                          await getUserPostData();
+                                                                          await getUserLikedData();
+                                                                          await getUserMediaData();
+                                                                        },
+                                                                        child:
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            Icon(
+                                                                              Icons.delete,
+                                                                              size: 20,
+                                                                              color: Colors.grey,
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  child:
+                                                                      IconButton(
+                                                                    icon: Icon(
+                                                                        Icons
+                                                                            .share,
+                                                                        size:
+                                                                            20,
+                                                                        color: Colors
+                                                                            .grey),
+                                                                    onPressed:
+                                                                        () {
+                                                                      Share.share(pum
+                                                                          .data
+                                                                          .posts[
+                                                                              index]
+                                                                          .url);
+                                                                    },
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                            Divider(
+                                                              thickness: 2,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }),
+                                        isloading3
+                                            ? Center(
+                                                child:
+                                                    CircularProgressIndicator())
+                                            : postUserMedia.code != 200
+                                                ? Center(
+                                                    child: Container(
+                                                        child: Text(
+                                                            "No Media Available")))
+                                                : ListView.builder(
+                                                    itemCount: postUserMedia
+                                                        .data.posts.length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return Container(
+                                                        child: Column(
+                                                          children: [
+                                                            Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.all(
+                                                                            8.0),
+                                                                    child:
+                                                                        Container(
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceEvenly,
+                                                                        children: [
+                                                                          CircleAvatar(
+                                                                            backgroundImage:
+                                                                                NetworkImage(postUserMedia.data.posts[index].owner.avatar),
+                                                                            radius:
+                                                                                28,
+                                                                          ),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                12,
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.center,
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                            children: [
+                                                                              Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    utf8convert(postUserMedia.data.posts[index].owner.name),
+                                                                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                                                                  ),
+                                                                                  Icon(
+                                                                                    Icons.verified_rounded,
+                                                                                    color: Colors.blueAccent,
+                                                                                    size: 15,
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              Text(
+                                                                                postUserMedia.data.posts[index].owner.username,
+                                                                                style: TextStyle(color: Colors.grey),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.all(
+                                                                            8.0),
+                                                                    child:
+                                                                        Container(
+                                                                      child:
+                                                                          Row(
+                                                                        children: [
+                                                                          Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.end,
+                                                                            children: [
+                                                                              Text(
+                                                                                postUserMedia.data.posts[index].time,
+                                                                                style: TextStyle(color: Colors.grey),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ]),
+                                                            Container(
+                                                              child: Text(
+                                                                utf8convert(
+                                                                    postUserMedia
+                                                                        .data
+                                                                        .posts[
+                                                                            index]
+                                                                        .text),
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontSize:
+                                                                        15,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .justify,
+                                                              ),
+                                                            ),
+                                                            postUserMedia
+                                                                        .data
+                                                                        .posts[
+                                                                            index]
+                                                                        .media
+                                                                        .length ==
+                                                                    0
+                                                                ? Container()
+                                                                : Container(
+                                                                    height: 180,
+                                                                    child: Padding(
+                                                                        padding: const EdgeInsets.all(4.0),
+                                                                        child: ListView.builder(
+                                                                            scrollDirection: Axis.horizontal,
+                                                                            shrinkWrap: true,
+                                                                            itemCount: postUserMedia.data.posts[index].media.length,
+                                                                            itemBuilder: (context, index2) {
+                                                                              return postUserMedia.data.posts[index].media[index2].type == "image"
+                                                                                  ? Padding(
+                                                                                      padding: const EdgeInsets.all(8.0),
+                                                                                      child: InkWell(
+                                                                                        onTap: () {},
+                                                                                        child: Container(
+                                                                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
+                                                                                          child: Image.network("${postUserMedia.data.posts[index].media[index2].xImg}"),
+                                                                                        ),
+                                                                                      ),
+                                                                                    )
+                                                                                  : Stack(
+                                                                                      children: [
+                                                                                        Padding(
+                                                                                          padding: const EdgeInsets.all(8.0),
+                                                                                          child: InkWell(
+                                                                                            onTap: () {},
+                                                                                            child: Container(
+                                                                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
+                                                                                              child: Image.network("${postUserMedia.data.posts[index].media[index2].xImg}"),
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                        Positioned(top: 10, right: 10, child: Icon(Icons.videocam, color: Colors.white))
+                                                                                      ],
+                                                                                    );
+                                                                            })),
+                                                                  ),
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Container(
+                                                                  child: Row(
+                                                                    children: [
+                                                                      SizedBox(
+                                                                        width:
+                                                                            35,
+                                                                      ),
+                                                                      Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceEvenly,
+                                                                        children: [
+                                                                          Icon(
+                                                                              Icons.comment,
+                                                                              size: 20,
+                                                                              color: Colors.grey),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                8,
+                                                                          ),
+                                                                          Text(
+                                                                            postUserMedia.data.posts[index].replysCount,
+                                                                            style:
+                                                                                TextStyle(color: postUserMedia.data.posts[index].replysCount != "0" ? Colors.deepOrangeAccent : Colors.grey),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            20,
+                                                                      ),
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          String
+                                                                              userAuth =
+                                                                              await getUserAuth();
+                                                                          print(
+                                                                              userAuth);
+                                                                          print(postUserMedia
+                                                                              .data
+                                                                              .posts[index]
+                                                                              .id);
+                                                                          lk = await showLikeButton(
+                                                                              userAuth,
+                                                                              postUserMedia.data.posts[index].id.toString());
+                                                                          await getUserPostData();
+                                                                          await getUserLikedData();
+                                                                          await getUserMediaData();
+                                                                        },
+                                                                        child:
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            Icon(Icons.favorite,
+                                                                                size: 20,
+                                                                                color: postUserMedia.data.posts[index].hasLiked ? Colors.deepOrangeAccent : Colors.grey),
+                                                                            SizedBox(
+                                                                              width: 8,
+                                                                            ),
+                                                                            Text(
+                                                                              postUserMedia.data.posts[index].likesCount,
+                                                                              style: TextStyle(color: postUserMedia.data.posts[index].hasLiked ? Colors.deepOrangeAccent : Colors.grey),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            20,
+                                                                      ),
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          String
+                                                                              userAuth =
+                                                                              await getUserAuth();
+                                                                          print(
+                                                                              userAuth);
+                                                                          print(postUserMedia
+                                                                              .data
+                                                                              .posts[index]
+                                                                              .id);
+                                                                          await deletePost(
+                                                                              userAuth,
+                                                                              postUserMedia.data.posts[index].id.toString());
+                                                                          await getUserPostData();
+                                                                          await getUserLikedData();
+                                                                          await getUserMediaData();
+                                                                        },
+                                                                        child:
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            Icon(
+                                                                              Icons.delete,
+                                                                              size: 20,
+                                                                              color: Colors.grey,
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  child:
+                                                                      IconButton(
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .share,
+                                                                      size: 20,
+                                                                      color: Colors
+                                                                          .grey,
+                                                                    ),
+                                                                    onPressed:
+                                                                        () {
+                                                                      Share.share(postUserMedia
+                                                                          .data
+                                                                          .posts[
+                                                                              index]
+                                                                          .url);
+                                                                    },
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                            Divider(
+                                                              thickness: 2,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }),
+                                        isloading4
+                                            ? Center(
+                                                child:
+                                                    CircularProgressIndicator())
+                                            : postUserLikes.code != 200
+                                                ? Center(
+                                                    child: Container(
+                                                        child: Text(
+                                                            "No Likes for the Post")))
+                                                : ListView.builder(
+                                                    itemCount: postUserLikes
+                                                        .data.posts.length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return Container(
+                                                        child: Column(
+                                                          children: [
+                                                            Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.all(
+                                                                            8.0),
+                                                                    child:
+                                                                        Container(
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceEvenly,
+                                                                        children: [
+                                                                          CircleAvatar(
+                                                                            backgroundImage:
+                                                                                NetworkImage(postUserLikes.data.posts[index].owner.avatar),
+                                                                            radius:
+                                                                                28,
+                                                                          ),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                12,
+                                                                          ),
+                                                                          Column(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.center,
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                            children: [
+                                                                              Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    utf8convert(postUserLikes.data.posts[index].owner.name),
+                                                                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                                                                  ),
+                                                                                  Icon(
+                                                                                    Icons.verified_rounded,
+                                                                                    color: Colors.blueAccent,
+                                                                                    size: 15,
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              Text(
+                                                                                postUserLikes.data.posts[index].owner.username,
+                                                                                style: TextStyle(color: Colors.grey),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.all(
+                                                                            8.0),
+                                                                    child:
+                                                                        Container(
+                                                                      child:
+                                                                          Row(
+                                                                        children: [
+                                                                          Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.end,
+                                                                            children: [
+                                                                              Text(
+                                                                                postUserLikes.data.posts[index].time,
+                                                                                style: TextStyle(color: Colors.grey),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ]),
+                                                            Container(
+                                                              child: Text(
+                                                                utf8convert(
+                                                                    postUserLikes
+                                                                        .data
+                                                                        .posts[
+                                                                            index]
+                                                                        .text),
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontSize:
+                                                                        15,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .justify,
+                                                              ),
+                                                            ),
+                                                            postUserLikes
+                                                                        .data
+                                                                        .posts[
+                                                                            index]
+                                                                        .media
+                                                                        .length ==
+                                                                    0
+                                                                ? Container()
+                                                                : Container(
+                                                                    height: 180,
+                                                                    child: Padding(
+                                                                        padding: const EdgeInsets.all(4.0),
+                                                                        child: ListView.builder(
+                                                                            scrollDirection: Axis.horizontal,
+                                                                            shrinkWrap: true,
+                                                                            itemCount: postUserLikes.data.posts[index].media.length,
+                                                                            itemBuilder: (context, index2) {
+                                                                              return postUserLikes.data.posts[index].media[index2].type == "image"
+                                                                                  ? Padding(
+                                                                                      padding: const EdgeInsets.all(8.0),
+                                                                                      child: InkWell(
+                                                                                        onTap: () {},
+                                                                                        child: Container(
+                                                                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
+                                                                                          child: Image.network("${postUserLikes.data.posts[index].media[index2].xImg}"),
+                                                                                        ),
+                                                                                      ),
+                                                                                    )
+                                                                                  : Stack(
+                                                                                      children: [
+                                                                                        Padding(
+                                                                                          padding: const EdgeInsets.all(8.0),
+                                                                                          child: InkWell(
+                                                                                            onTap: () {},
+                                                                                            child: Container(
+                                                                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
+                                                                                              child: Image.network("${postUserMedia.data.posts[index].media[index2].xImg}"),
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                        Positioned(top: 10, right: 10, child: Icon(Icons.videocam, color: Colors.white))
+                                                                                      ],
+                                                                                    );
+                                                                            })),
+                                                                  ),
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Container(
+                                                                  child: Row(
+                                                                    children: [
+                                                                      SizedBox(
+                                                                        width:
+                                                                            35,
+                                                                      ),
+                                                                      Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceEvenly,
+                                                                        children: [
+                                                                          Icon(
+                                                                              Icons.comment,
+                                                                              size: 20,
+                                                                              color: Colors.grey),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                8,
+                                                                          ),
+                                                                          Text(
+                                                                            postUserLikes.data.posts[index].replysCount,
+                                                                            style:
+                                                                                TextStyle(color: postUserLikes.data.posts[index].replysCount != "0" ? Colors.deepOrangeAccent : Colors.grey),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            20,
+                                                                      ),
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          String
+                                                                              userAuth =
+                                                                              await getUserAuth();
+                                                                          print(
+                                                                              userAuth);
+                                                                          print(postUserLikes
+                                                                              .data
+                                                                              .posts[index]
+                                                                              .id);
+                                                                          lk = await showLikeButton(
+                                                                              userAuth,
+                                                                              postUserLikes.data.posts[index].id.toString());
+                                                                          await getUserMediaData();
+                                                                          await getUserPostData();
+                                                                          await getUserLikedData();
+                                                                        },
+                                                                        child:
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            Icon(Icons.favorite,
+                                                                                size: 20,
+                                                                                color: postUserLikes.data.posts[index].hasLiked ? Colors.deepOrangeAccent : Colors.grey),
+                                                                            SizedBox(
+                                                                              width: 8,
+                                                                            ),
+                                                                            Text(
+                                                                              postUserLikes.data.posts[index].likesCount,
+                                                                              style: TextStyle(color: postUserLikes.data.posts[index].hasLiked ? Colors.deepOrangeAccent : Colors.grey),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            20,
+                                                                      ),
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          String
+                                                                              userAuth =
+                                                                              await getUserAuth();
+                                                                          print(
+                                                                              userAuth);
+                                                                          print(postUserLikes
+                                                                              .data
+                                                                              .posts[index]
+                                                                              .id);
+                                                                          await deletePost(
+                                                                              userAuth,
+                                                                              postUserLikes.data.posts[index].id.toString());
+                                                                          await getUserMediaData();
+                                                                          await getUserPostData();
+                                                                          await getUserLikedData();
+                                                                        },
+                                                                        child:
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            Icon(
+                                                                              Icons.delete,
+                                                                              size: 20,
+                                                                              color: Colors.grey,
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  child:
+                                                                      IconButton(
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .share,
+                                                                      size: 20,
+                                                                      color: Colors
+                                                                          .grey,
+                                                                    ),
+                                                                    onPressed:
+                                                                        () {},
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                            Divider(
+                                                              thickness: 2,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }),
+                                      ],
+                                      controller: _tabController,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  )
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    children: [
-                      Text("45",style: TextStyle(fontSize: 16),),
-                      Text("Posts")
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Text("45",style: TextStyle(fontSize: 16),),
-                      Text("Friends")
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Image.asset("images/addpeople.png",width: 20,height: 20,),
-                      Text("Add Friends")
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Image.asset("images/settings.png",width: 20,height: 20,),
-                      Text("Posts")
-                    ],
-                  )
-                ],
-              ),
-            ),
-
-
-            // the tab bar with two items
-            SizedBox(
-              height: 50,
-              child: AppBar(
-                bottom: TabBar(
-                  labelStyle: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
-                  tabs: [
-                    Tab(
-                      text:"Images",
-                    ),
-                    Tab(
-                      text: "Videos",
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // create widgets for each tab bar here
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _getPhotos(),
-                  _getVideos(),
-
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+                  ]),
+                ])),
+              ));
   }
-}
 
-Widget _getPhotos()
-{
-  final List<String> images = [
-    "https://uae.microless.com/cdn/no_image.jpg",
-    "https://images-na.ssl-images-amazon.com/images/I/81aF3Ob-2KL._UX679_.jpg",
-    "https://www.boostmobile.com/content/dam/boostmobile/en/products/phones/apple/iphone-7/silver/device-front.png.transform/pdpCarousel/image.jpg",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgUgs8_kmuhScsx-J01d8fA1mhlCR5-1jyvMYxqCB8h3LCqcgl9Q",
-    "https://ae01.alicdn.com/kf/HTB11tA5aiAKL1JjSZFoq6ygCFXaw/Unlocked-Samsung-GALAXY-S2-I9100-Mobile-Phone-Android-Wi-Fi-GPS-8-0MP-camera-Core-4.jpg_640x640.jpg",
-    "https://media.ed.edmunds-media.com/gmc/sierra-3500hd/2018/td/2018_gmc_sierra-3500hd_f34_td_411183_1600.jpg",
-    "https://hips.hearstapps.com/amv-prod-cad-assets.s3.amazonaws.com/images/16q1/665019/2016-chevrolet-silverado-2500hd-high-country-diesel-test-review-car-and-driver-photo-665520-s-original.jpg",
-    "https://www.galeanasvandykedodge.net/assets/stock/ColorMatched_01/White/640/cc_2018DOV170002_01_640/cc_2018DOV170002_01_640_PSC.jpg",
-    "https://media.onthemarket.com/properties/6191869/797156548/composite.jpg",
-    "https://media.onthemarket.com/properties/6191840/797152761/composite.jpg",
-  ];
-  return StaggeredGridView.countBuilder(
-    crossAxisCount: 4,
-    itemCount: images.length,
-    itemBuilder: (BuildContext context, int index) => Card(
-      child: Column(
-        children: <Widget>[
-          Image.network(images[index]),
-          Text("Some text"),
-        ],
-      ),
-    ),
-    staggeredTileBuilder: (int index) =>
-    new StaggeredTile.fit(2),
-    mainAxisSpacing: 4.0,
-    crossAxisSpacing: 4.0,
-  );
-}
-Widget _getVideos()
-{
-  final List<String> images = [
-    "https://uae.microless.com/cdn/no_image.jpg",
-    "https://images-na.ssl-images-amazon.com/images/I/81aF3Ob-2KL._UX679_.jpg",
-    "https://www.boostmobile.com/content/dam/boostmobile/en/products/phones/apple/iphone-7/silver/device-front.png.transform/pdpCarousel/image.jpg",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgUgs8_kmuhScsx-J01d8fA1mhlCR5-1jyvMYxqCB8h3LCqcgl9Q",
-    "https://ae01.alicdn.com/kf/HTB11tA5aiAKL1JjSZFoq6ygCFXaw/Unlocked-Samsung-GALAXY-S2-I9100-Mobile-Phone-Android-Wi-Fi-GPS-8-0MP-camera-Core-4.jpg_640x640.jpg",
-    "https://media.ed.edmunds-media.com/gmc/sierra-3500hd/2018/td/2018_gmc_sierra-3500hd_f34_td_411183_1600.jpg",
-    "https://hips.hearstapps.com/amv-prod-cad-assets.s3.amazonaws.com/images/16q1/665019/2016-chevrolet-silverado-2500hd-high-country-diesel-test-review-car-and-driver-photo-665520-s-original.jpg",
-    "https://www.galeanasvandykedodge.net/assets/stock/ColorMatched_01/White/640/cc_2018DOV170002_01_640/cc_2018DOV170002_01_640_PSC.jpg",
-    "https://media.onthemarket.com/properties/6191869/797156548/composite.jpg",
-    "https://media.onthemarket.com/properties/6191840/797152761/composite.jpg",
-  ];
-  return StaggeredGridView.countBuilder(
-    crossAxisCount: 4,
-    itemCount: images.length,
-    itemBuilder: (BuildContext context, int index) => Card(
-      child: Column(
-        children: <Widget>[
-          Image.network(images[index]),
-          Text("Some text"),
-        ],
-      ),
-    ),
-    staggeredTileBuilder: (int index) =>
-    new StaggeredTile.fit(2),
-    mainAxisSpacing: 4.0,
-    crossAxisSpacing: 4.0,
-  );
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 }

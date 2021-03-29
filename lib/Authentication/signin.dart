@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:my_autocare/Authentication/controller/login_controller.dart';
+import 'package:my_autocare/Authentication/model/login_model.dart';
 import 'package:my_autocare/Authentication/otp_screen.dart';
 
 class SignIn extends StatefulWidget {
@@ -9,9 +11,39 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
 
+  LoginUserController loginUserController;
+  LoginUser loginUser;
+
   final TextEditingController controller = TextEditingController();
   String initialCountry = 'IN';
   PhoneNumber number = PhoneNumber(isoCode: 'IN');
+  String mobile_num;
+
+  sendOtp(String mb) async
+  {
+    print(mb);
+    loginUserController=LoginUserController();
+    loginUser=await loginUserController.getLoginInfo(mb);
+    if(loginUser.codemessage=="Success")
+      {
+        Navigator.push(
+            context,
+            new MaterialPageRoute(
+                builder: (BuildContext context) => new Otp(
+                  mb: number.parseNumber(),
+                )));
+      }
+    else
+      {
+        print("Error");
+      }
+
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +53,6 @@ class _SignInState extends State<SignIn> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
               Container(
                 child: Column(
                   children: [
@@ -47,12 +78,12 @@ class _SignInState extends State<SignIn> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: Colors.white,
-
                         ),
                         child: InternationalPhoneNumberInput(
-                          onInputChanged: (PhoneNumber number)
+                          onInputChanged: (PhoneNumber num)
                           {
-                            print(number.phoneNumber);
+                            number=num;
+                            print(number.parseNumber());
                           },
                           onInputValidated: (bool value)
                           {
@@ -82,13 +113,8 @@ class _SignInState extends State<SignIn> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: InkWell(
-                        onTap: (){
-                          Navigator.push(
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (BuildContext context) => new Otp(
-                                    email: "shara.app@gmail.com",
-                                  )));
+                        onTap: ()async{
+                          await sendOtp(number.parseNumber());
                         },
                         child: Container(
                           height: 60,
@@ -189,7 +215,6 @@ class _SignInState extends State<SignIn> {
                         ),
                       ],
                     ),
-
                   ],
                 ),
               ),
@@ -215,12 +240,9 @@ class _SignInState extends State<SignIn> {
                         ),),
                       ],
                     )
-
                   ],
                 ),
               )
-
-
             ],
           )
       ),

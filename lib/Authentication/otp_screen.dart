@@ -1,25 +1,30 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:my_autocare/Authentication/controller/after_login_Controller.dart';
+import 'package:my_autocare/Authentication/model/after_login_model.dart';
+import 'package:my_autocare/pages/main_page.dart';
+import 'package:my_autocare/profile/extra_pages/profile_settings.dart';
+import 'package:my_autocare/shared_perferences/login_user_data.dart';
 
 class Otp extends StatefulWidget {
-  final String email;
-  final String newEmail;
+  final String mb;
   final bool isGuestCheckOut;
 
-  const Otp({
-    Key key,
-    @required this.email,
-    this.newEmail = "",
+  Otp({
+    @required this.mb,
     this.isGuestCheckOut,
-  }) : super(key: key);
+  });
 
   @override
   _OtpState createState() => new _OtpState();
 }
 
 class _OtpState extends State<Otp> with SingleTickerProviderStateMixin {
-  // Constants
+
+  AfterLogin al;
+  AfterLoginController afterLoginController;
+
+
   final int time = 30;
   AnimationController _controller;
 
@@ -73,7 +78,7 @@ class _OtpState extends State<Otp> with SingleTickerProviderStateMixin {
   // Return "Email" label
   get _getEmailLabel {
     return new Text(
-      "We have sent a verfication code to\n+91-7708433126",
+      "We have sent a verfication code to\n$widget.mb",
       textAlign: TextAlign.center,
       style: new TextStyle(
           fontSize: 18.0, color: Colors.black, fontWeight: FontWeight.w600),
@@ -375,8 +380,9 @@ class _OtpState extends State<Otp> with SingleTickerProviderStateMixin {
   }
 
   // Current digit
-  void _setCurrentDigit(int i) {
-    setState(() {
+  void _setCurrentDigit(int i) async{
+    String otp;
+    setState(() async {
       _currentDigit = i;
       if (_firstDigit == null) {
         _firstDigit = _currentDigit;
@@ -384,15 +390,36 @@ class _OtpState extends State<Otp> with SingleTickerProviderStateMixin {
         _secondDigit = _currentDigit;
       } else if (_thirdDigit == null) {
         _thirdDigit = _currentDigit;
-      } else if (_fourthDigit == null) {
+      }
+      else if (_fourthDigit == null)
+      {
         _fourthDigit = _currentDigit;
 
-        var otp = _firstDigit.toString() +
+          var otp = _firstDigit.toString() +
             _secondDigit.toString() +
             _thirdDigit.toString() +
             _fourthDigit.toString();
 
         // Verify your otp by here. API call
+        afterLoginController=AfterLoginController();
+        al=await afterLoginController.getLoggedInInfo(widget.mb, otp);
+        if(al.codemessage=="Success")
+          {
+            //saveLoginUserDetails(userId: al.user.id,userAuth: al.auth.authToken);
+            bool msg=await getAlreadyVisited();
+            if(msg)
+              {
+                Navigator.pushReplacement(context, new MaterialPageRoute(builder: (context)=>Pages(currentTab: 0,)));
+              }
+            else
+              {
+                Navigator.pushReplacement(context, new MaterialPageRoute(builder: (context)=>ProfileSettings()));
+              }
+
+          }
+
+
+
       }
     });
   }

@@ -23,7 +23,7 @@ class AdMobService
         return 'ca-app-pub-3940256099942544/2934735716';
       }
       else if(Platform.isAndroid){
-        return 'ca-app-pub-8819622948893103/3936799830';
+        return 'ca-app-pub-3940256099942544/2934735716';
       }
       return null;
     }
