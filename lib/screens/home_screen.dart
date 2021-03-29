@@ -1,15 +1,14 @@
 import 'package:buttons_tabbar/buttons_tabbar.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/rendering.dart';
-import 'package:my_autocare/pages/drawer.dart';
-import 'package:my_autocare/new_car_details/new_car_details.dart';
-
-import 'package:my_autocare/pages/notification.dart';
-import 'package:my_autocare/used_car_details/used_car_details.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:my_autocare/new_car_details/new_car_details.dart';
+import 'package:my_autocare/pages/drawer.dart';
+import 'package:my_autocare/pages/notification.dart';
+import 'package:my_autocare/used_car_details/used_car_details.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -144,28 +143,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                 fontFamily: "SecularOne",
                                 fontSize: 14,
                                 color: Colors.white)),
-                      // Row(
-                      //   children: [
-                      //     FlatButton(
-                      //       child: Text("Get location"),
-                      //       onPressed: () {
-                      //         _getCurrentLocation();
-                      //         print(_currentAddress);
-                      //       },
-                      //     ),
-                      //     SizedBox(
-                      //       width: 0.03 *
-                      //           MediaQuery.of(context).size.width,
-                      //     ),
-                      //     Image.asset(
-                      //       "images/down-arrow.png",
-                      //       width: 0.03 *
-                      //           MediaQuery.of(context).size.width,
-                      //       height: 0.018 *
-                      //           MediaQuery.of(context).size.height,
-                      //     ),
-                      //   ],
-                      // ),
+                      Row(
+                        children: [
+                          // FlatButton(
+                          //   child: Text("Get location"),
+                          //   onPressed: () {
+                          //     _getCurrentLocation();
+                          //     print(_currentAddress);
+                          //   },
+                          // ),
+                          // SizedBox(
+                          //   width: 0.03 * MediaQuery.of(context).size.width,
+                          // ),
+                          // Image.asset(
+                          //   "images/down-arrow.png",
+                          //   width: 0.03 * MediaQuery.of(context).size.width,
+                          //   height: 0.018 * MediaQuery.of(context).size.height,
+                          // ),
+                        ],
+                      ),
                     ],
                   )
                 ],
@@ -226,151 +222,151 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(
                 height: 0.01 * MediaQuery.of(context).size.height,
               ),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 0.07 * MediaQuery.of(context).size.width,
-                  ),
-
-                  // isDrawerOpen
-                  //     ? InkWell(
-                  //         onTap: () {
-                  //           setState(() {
-                  //             isDrawerOpen = false;
-                  //           });
-                  //           print("return");
-                  //           Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (context) => HomePage(
-                  //                         currentTab: 0,
-                  //                         left: 0.6 * screenWidth,
-                  //                         right: -0.4 * screenWidth,
-                  //                         top: 0.1 * screenHeight,
-                  //                         bottom: 0.1 * screenWidth,
-                  //                       )));
-                  //         },
-                  //         child: Image.asset(
-                  //           "images/back-arrow.png",
-                  //           fit: BoxFit.fill,
-                  //           width: 0.06 * MediaQuery.of(context).size.width,
-                  //         ),
-                  //       )
-                  //     : InkWell(
-                  //         onTap: () {
-                  //           setState(() {
-                  //             isDrawerOpen = true;
-                  //           });
-                  //           print("Testing");
-                  //           Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (context) => HomePage(
-                  //                         currentTab: 0,
-                  //                         left: 0.4 * screenWidth,
-                  //                         right: -0.4 * screenWidth,
-                  //                         top: 0.1 * screenHeight,
-                  //                         bottom: 0.1 * screenWidth,
-                  //                       )));
-                  //         },
-                  //         child: Image.asset(
-                  //           "images/menu.png",
-                  //           fit: BoxFit.fill,
-                  //           width: 0.06 * MediaQuery.of(context).size.width,
-                  //         ),
-                  //       ),
-                  // SizedBox(
-                  //   width: 0.145 * MediaQuery.of(context).size.width,
-                  // ),
-                  // Column(
-                  //   mainAxisAlignment: MainAxisAlignment.start,
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   mainAxisSize: MainAxisSize.min,
-                  //   children: [
-                  //     Padding(
-                  //       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                  //       child: Text("Current Location",
-                  //           style: TextStyle(
-                  //               fontWeight: FontWeight.w600,
-                  //               fontFamily: "SecularOne",
-                  //               fontSize: 16,
-                  //               color: Colors.black)),
-                  //     ),
-                  //     Padding(
-                  //       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                  //       child: Column(
-                  //         children: [
-                  //           if (_currentAddress != null) Text(_currentAddress),
-                  // Row(
-                  //   children: [
-                  //     FlatButton(
-                  //       child: Text("Get location"),
-                  //       onPressed: () {
-                  //         _getCurrentLocation();
-                  //         print(_currentAddress);
-                  //       },
-                  //     ),
-                  //     SizedBox(
-                  //       width: 0.03 *
-                  //           MediaQuery.of(context).size.width,
-                  //     ),
-                  //     Image.asset(
-                  //       "images/down-arrow.png",
-                  //       width: 0.03 *
-                  //           MediaQuery.of(context).size.width,
-                  //       height: 0.018 *
-                  //           MediaQuery.of(context).size.height,
-                  //     ),
-                  //   ],
-                  // ),
-                  //         ],
-                  //       ),
-                  //     )
-                  //   ],
-                  // ),
-                  // SizedBox(
-                  //   width: 0.26 * MediaQuery.of(context).size.width,
-                  // ),
-                  // Stack(
-                  //   overflow: Overflow.visible,
-                  //   children: [
-                  //     InkWell(
-                  //       onTap: () {
-                  //         Navigator.push(
-                  //             context,
-                  //             MaterialPageRoute(
-                  //                 builder: (context) => Notifications()));
-                  //       },
-                  //       child: Image.asset(
-                  //         "images/bell.png",
-                  //         fit: BoxFit.fill,
-                  //         color: Colors.black,
-                  //         width: 0.04 * MediaQuery.of(context).size.width,
-                  //         height: 0.024 * MediaQuery.of(context).size.height,
-                  //       ),
-                  //     ),
-                  //     Positioned(
-                  //         right: -6,
-                  //         top: -5,
-                  //         child: Container(
-                  //           decoration: BoxDecoration(
-                  //               color: Colors.deepOrangeAccent,
-                  //               shape: BoxShape.circle),
-                  //           child: Padding(
-                  //             padding: const EdgeInsets.all(2.2),
-                  //             child: Text(
-                  //               "${"5+"}",
-                  //               style: TextStyle(
-                  //                   color: Colors.white,
-                  //                   fontWeight: FontWeight.bold,
-                  //                   fontSize: 10),
-                  //             ),
-                  //           ),
-                  //         ))
-                  //   ],
-                  // )
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     SizedBox(
+              //       width: 0.07 * MediaQuery.of(context).size.width,
+              //     ),
+              //
+              //     // isDrawerOpen
+              //     //     ? InkWell(
+              //     //         onTap: () {
+              //     //           setState(() {
+              //     //             isDrawerOpen = false;
+              //     //           });
+              //     //           print("return");
+              //     //           Navigator.push(
+              //     //               context,
+              //     //               MaterialPageRoute(
+              //     //                   builder: (context) => HomePage(
+              //     //                         currentTab: 0,
+              //     //                         left: 0.6 * screenWidth,
+              //     //                         right: -0.4 * screenWidth,
+              //     //                         top: 0.1 * screenHeight,
+              //     //                         bottom: 0.1 * screenWidth,
+              //     //                       )));
+              //     //         },
+              //     //         child: Image.asset(
+              //     //           "images/back-arrow.png",
+              //     //           fit: BoxFit.fill,
+              //     //           width: 0.06 * MediaQuery.of(context).size.width,
+              //     //         ),
+              //     //       )
+              //     //     : InkWell(
+              //     //         onTap: () {
+              //     //           setState(() {
+              //     //             isDrawerOpen = true;
+              //     //           });
+              //     //           print("Testing");
+              //     //           Navigator.push(
+              //     //               context,
+              //     //               MaterialPageRoute(
+              //     //                   builder: (context) => HomePage(
+              //     //                         currentTab: 0,
+              //     //                         left: 0.4 * screenWidth,
+              //     //                         right: -0.4 * screenWidth,
+              //     //                         top: 0.1 * screenHeight,
+              //     //                         bottom: 0.1 * screenWidth,
+              //     //                       )));
+              //     //         },
+              //     //         child: Image.asset(
+              //     //           "images/menu.png",
+              //     //           fit: BoxFit.fill,
+              //     //           width: 0.06 * MediaQuery.of(context).size.width,
+              //     //         ),
+              //     //       ),
+              //     // SizedBox(
+              //     //   width: 0.145 * MediaQuery.of(context).size.width,
+              //     // ),
+              //     // Column(
+              //     //   mainAxisAlignment: MainAxisAlignment.start,
+              //     //   crossAxisAlignment: CrossAxisAlignment.start,
+              //     //   mainAxisSize: MainAxisSize.min,
+              //     //   children: [
+              //     //     Padding(
+              //     //       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+              //     //       child: Text("Current Location",
+              //     //           style: TextStyle(
+              //     //               fontWeight: FontWeight.w600,
+              //     //               fontFamily: "SecularOne",
+              //     //               fontSize: 16,
+              //     //               color: Colors.black)),
+              //     //     ),
+              //     //     Padding(
+              //     //       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+              //     //       child: Column(
+              //     //         children: [
+              //     //           if (_currentAddress != null) Text(_currentAddress),
+              //     // Row(
+              //     //   children: [
+              //     //     FlatButton(
+              //     //       child: Text("Get location"),
+              //     //       onPressed: () {
+              //     //         _getCurrentLocation();
+              //     //         print(_currentAddress);
+              //     //       },
+              //     //     ),
+              //     //     SizedBox(
+              //     //       width: 0.03 *
+              //     //           MediaQuery.of(context).size.width,
+              //     //     ),
+              //     //     Image.asset(
+              //     //       "images/down-arrow.png",
+              //     //       width: 0.03 *
+              //     //           MediaQuery.of(context).size.width,
+              //     //       height: 0.018 *
+              //     //           MediaQuery.of(context).size.height,
+              //     //     ),
+              //     //   ],
+              //     // ),
+              //     //         ],
+              //     //       ),
+              //     //     )
+              //     //   ],
+              //     // ),
+              //     // SizedBox(
+              //     //   width: 0.26 * MediaQuery.of(context).size.width,
+              //     // ),
+              //     // Stack(
+              //     //   overflow: Overflow.visible,
+              //     //   children: [
+              //     //     InkWell(
+              //     //       onTap: () {
+              //     //         Navigator.push(
+              //     //             context,
+              //     //             MaterialPageRoute(
+              //     //                 builder: (context) => Notifications()));
+              //     //       },
+              //     //       child: Image.asset(
+              //     //         "images/bell.png",
+              //     //         fit: BoxFit.fill,
+              //     //         color: Colors.black,
+              //     //         width: 0.04 * MediaQuery.of(context).size.width,
+              //     //         height: 0.024 * MediaQuery.of(context).size.height,
+              //     //       ),
+              //     //     ),
+              //     //     Positioned(
+              //     //         right: -6,
+              //     //         top: -5,
+              //     //         child: Container(
+              //     //           decoration: BoxDecoration(
+              //     //               color: Colors.deepOrangeAccent,
+              //     //               shape: BoxShape.circle),
+              //     //           child: Padding(
+              //     //             padding: const EdgeInsets.all(2.2),
+              //     //             child: Text(
+              //     //               "${"5+"}",
+              //     //               style: TextStyle(
+              //     //                   color: Colors.white,
+              //     //                   fontWeight: FontWeight.bold,
+              //     //                   fontSize: 10),
+              //     //             ),
+              //     //           ),
+              //     //         ))
+              //     //   ],
+              //     // )
+              //   ],
+              // ),
               SizedBox(
                 height: 20,
               ),

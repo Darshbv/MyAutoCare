@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:my_autocare/autobook_controller/post_controller.dart';
 import 'package:my_autocare/autobook_controller/profile_controller.dart';
 import 'package:my_autocare/main_model/like_post_model.dart';
@@ -9,7 +11,7 @@ import 'package:my_autocare/main_model/post_user_media.dart';
 import 'package:my_autocare/main_model/post_user_model.dart';
 import 'package:my_autocare/main_model/profile_model.dart';
 import 'package:my_autocare/post_upload/post_controller.dart';
-import 'package:http/http.dart' as http;
+import 'package:my_autocare/profile/extra_pages/profile_settings.dart';
 import 'package:my_autocare/shared_perferences/login_user_data.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
@@ -205,10 +207,17 @@ class _ProfileScreenState extends State<ProfileScreen>
                     ),
                     Positioned(
                       top: 210,
-                      left: 240,
+                      left: 200,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
+                          IconButton(
+                            color: Colors.deepOrangeAccent,
+                            icon: Icon(Icons.more_vert),
+                            onPressed: () {
+                              showBottom();
+                            },
+                          ),
                           RaisedButton(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25.0),
@@ -216,18 +225,18 @@ class _ProfileScreenState extends State<ProfileScreen>
                             onPressed: () {},
                             color: Colors.red,
                             textColor: Colors.white,
-                            child: Text("PROFILE SETTINGS".toUpperCase(),
-                                style: TextStyle(
-                                    fontSize: 10, fontWeight: FontWeight.bold)),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: IconButton(
-                              color: Colors.deepOrangeAccent,
-                              icon: Icon(Icons.more_vert),
-                              onPressed: () {
-                                showBottom();
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ProfileSettings()));
                               },
+                              child: Text("PROFILE SETTINGS".toUpperCase(),
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ],
@@ -595,7 +604,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                                                         onTap: () {},
                                                                                         child: Container(
                                                                                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
-                                                                                          child: Image.network("${pum.data.posts[index].media[index2].xImg}"),
+                                                                                          child: Image.network("${pum.data.posts[index].media[index2].xSrc}"),
                                                                                         ),
                                                                                       ),
                                                                                     )
@@ -607,7 +616,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                                                             onTap: () {},
                                                                                             child: Container(
                                                                                               decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
-                                                                                              child: Image.network("${pum.data.posts[index].media[index2].xImg}"),
+                                                                                              child: Image.network("${pum.data.posts[index].media[index2].xSrc}"),
                                                                                             ),
                                                                                           ),
                                                                                         ),
@@ -901,7 +910,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                                                         onTap: () {},
                                                                                         child: Container(
                                                                                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
-                                                                                          child: Image.network("${postUserMedia.data.posts[index].media[index2].xImg}"),
+                                                                                          child: Image.network("${postUserMedia.data.posts[index].media[index2].xSrc},"),
                                                                                         ),
                                                                                       ),
                                                                                     )
@@ -913,7 +922,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                                                             onTap: () {},
                                                                                             child: Container(
                                                                                               decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
-                                                                                              child: Image.network("${postUserMedia.data.posts[index].media[index2].xImg}"),
+                                                                                              child: Image.network("${postUserMedia.data.posts[index].media[index2].xSrc}"),
                                                                                             ),
                                                                                           ),
                                                                                         ),
@@ -1177,7 +1186,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                                             .bold),
                                                                 textAlign:
                                                                     TextAlign
-                                                                        .justify,
+                                                                        .start,
                                                               ),
                                                             ),
                                                             postUserLikes
@@ -1204,7 +1213,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                                                         onTap: () {},
                                                                                         child: Container(
                                                                                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
-                                                                                          child: Image.network("${postUserLikes.data.posts[index].media[index2].xImg}"),
+                                                                                          child: Image.network(
+                                                                                            "${postUserLikes.data.posts[index].media[index2].xSrc}",
+                                                                                            fit: BoxFit.cover,
+                                                                                          ),
                                                                                         ),
                                                                                       ),
                                                                                     )
@@ -1216,7 +1228,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                                                             onTap: () {},
                                                                                             child: Container(
                                                                                               decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.0)),
-                                                                                              child: Image.network("${postUserMedia.data.posts[index].media[index2].xImg}"),
+                                                                                              child: Image.network("${postUserMedia.data.posts[index].media[index2].xSrc}"),
                                                                                             ),
                                                                                           ),
                                                                                         ),

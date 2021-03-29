@@ -106,7 +106,7 @@ class _NewCarsState extends State<NewCars> with SingleTickerProviderStateMixin {
               height: 120,
               initialPage: 0,
               enableInfiniteScroll: true,
-              reverse: false,
+              reverse: true,
               autoPlay: true,
               autoPlayInterval: Duration(seconds: 3),
               autoPlayAnimationDuration: Duration(milliseconds: 800),
