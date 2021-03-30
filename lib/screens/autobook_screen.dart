@@ -256,7 +256,10 @@ class _AutoBookScreenState extends State<AutoBookScreen> {
                                                                 .circular(
                                                                     15.0)),
                                                     child: Image.network(
-                                                        "${autoBook.data.feeds[index].media[index2].xSrc}"),
+                                                      "${autoBook.data.feeds[index].media[index2].xSrc}",
+                                                      fit: BoxFit.cover,
+                                                      width: 300,
+                                                    ),
                                                   ),
                                                 ),
                                               )
@@ -275,7 +278,9 @@ class _AutoBookScreenState extends State<AutoBookScreen> {
                                                                     .circular(
                                                                         15.0)),
                                                         child: Image.network(
-                                                            "${autoBook.data.feeds[index].media[index2].xSrc}"),
+                                                          "${autoBook.data.feeds[index].media[index2].xSrc}",
+                                                          fit: BoxFit.fitWidth,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
